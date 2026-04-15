@@ -66,17 +66,19 @@ class NewsletterGenerator:
         self,
         top_certificates: list[Certificato],
         market_context: str = "",
+        external_sources: str = "",
     ) -> str:
         """Genera l'HTML completo della newsletter.
 
         Args:
             top_certificates: I migliori certificati (gia' ordinati dallo screener).
             market_context: Notizie di mercato reali (opzionale).
+            external_sources: Dati da fonti esterne (nuovi certificati, articoli).
 
         Returns:
             Stringa HTML della newsletter pronta per l'invio.
         """
-        prompt = self._build_prompt(top_certificates, market_context)
+        prompt = self._build_prompt(top_certificates, market_context, external_sources)
         html = self._call_claude(prompt)
         logger.info("Newsletter generata: %d caratteri HTML", len(html))
         return html
@@ -85,6 +87,7 @@ class NewsletterGenerator:
         self,
         certificates: list[Certificato],
         market_context: str = "",
+        external_sources: str = "",
     ) -> str:
         """Costruisce il prompt completo per Claude."""
         # Argomento didattico basato sul numero della settimana ISO
@@ -114,6 +117,17 @@ class NewsletterGenerator:
                 "NON inventare notizie, eventi o dati di mercato specifici."
             )
 
+        # Fonti esterne (nuovi certificati e articoli)
+        if external_sources:
+            external_section = (
+                f"## FONTI ESTERNE (dati reali da siti specializzati)\n"
+                f"Usa queste informazioni per arricchire la newsletter, specialmente "
+                f"la sezione 'Novita' dal mercato'. Cita la fonte quando usi questi dati.\n\n"
+                f"{external_sources}"
+            )
+        else:
+            external_section = ""
+
         today_str = date.today().strftime("%d/%m/%Y")
 
         return f"""\
@@ -124,6 +138,8 @@ IMPORTANTE: Genera SOLO codice HTML valido (senza tag <html>, <head>, <body>). U
 per compatibilita' email. Font: Arial, sans-serif. Max-width: 600px. Background: bianco.
 
 {market_section}
+
+{external_section}
 
 ## STRUTTURA OBBLIGATORIA
 
@@ -148,11 +164,19 @@ Per ciascuno dei seguenti 5 certificati, scrivi 3-4 frasi in italiano semplice:
 Dati certificati:
 {certs_text}
 
-### 3. SPAZIO DIDATTICO (~200 parole)
+### 3. NOVITA' DAL MERCATO (~150 parole)
+Se hai dati da fonti esterne (nuovi certificati, articoli), crea una breve sezione
+"Novita' dal mercato" che segnala 2-3 nuove emissioni o notizie rilevanti.
+- Per ogni nuovo certificato, menziona ISIN, sottostante, cedola e barriera SE disponibili
+- Cita sempre la fonte (investire-certificati.it o investire.biz)
+- Se non hai dati esterni, OMETTI questa sezione interamente (non inventare)
+- NON inventare MAI ISIN, cedole o barriere
+
+### 4. SPAZIO DIDATTICO (~200 parole)
 Argomento di questa settimana: "{topic}"
 Spiega questo concetto in modo chiaro e accessibile, con un esempio concreto.
 
-### 4. OPPORTUNITA' IN EVIDENZA (~300 parole)
+### 5. OPPORTUNITA' IN EVIDENZA (~300 parole)
 Analisi approfondita del certificato numero 1:
 {top_cert_text}
 
@@ -163,7 +187,7 @@ Includi:
 - Se molti dati sono 0.0, dillo: "Alcuni dati tecnici non sono disponibili dalla fonte"
 - Termina con un disclaimer chiaro
 
-### 5. FOOTER
+### 6. FOOTER
 Includi:
 - Placeholder per link di disiscrizione: [UNSUBSCRIBE_LINK]
 - Disclaimer legale standard italiano sugli strumenti finanziari complessi

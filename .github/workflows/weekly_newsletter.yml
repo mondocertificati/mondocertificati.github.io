@@ -1,9 +1,10 @@
-name: Newsletter Settimanale
+name: Newsletter Bisettimanale
 
 on:
   schedule:
-    # Ogni martedi' alle 07:00 UTC (= 08:00 CET / 09:00 CEST)
-    - cron: "0 7 * * 2"
+    # Lunedi' e giovedi' alle 07:00 UTC (= 08:00 CET / 09:00 CEST)
+    - cron: "0 7 * * 1"
+    - cron: "0 7 * * 4"
   workflow_dispatch:
     inputs:
       dry_run:

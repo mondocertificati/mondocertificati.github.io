@@ -1,12 +1,13 @@
 """Orchestratore principale della newsletter Mondo Certificati.
 
 Flusso:
-    1. scraper.run()          -> List[Certificato]
-    2. screener.rank()        -> List[Certificato] (top 5)
-    3. generator.create_issue() -> html_content: str
-    4. beehiiv.publish_draft()  -> post_id: str
-    5. db.log_issue()           -> None
-    6. Stampa riepilogo
+    1. scraper.run()                -> List[Certificato]
+    2. fetch_market_headlines()     -> str (notizie Radiocor)
+    3. fetch_external_sources()     -> ExternalSourcesData (nuovi certificati)
+    4. screener.rank()              -> List[Certificato] (top 5)
+    5. generator.create_issue()     -> html_content: str
+    6. beehiiv.publish_draft()      -> post_id: str
+    7. db.log_issue()               -> None
 
 Uso:
     python main.py              # Pipeline completa
@@ -36,13 +37,14 @@ def run_pipeline(*, dry_run: bool = False) -> None:
     from content.market_news import fetch_market_headlines
     from delivery.beehiiv import BeehiivClient
     from scraper.borsaitaliana import BorsaItalianaScraper
+    from scraper.news_sources import fetch_external_sources
     from storage.db import Database
 
     db = Database()
 
-    # ── 1. Scraping ─────────────────────────────────────────────────
+    # ── 1. Scraping Borsa Italiana ──────────────────────────────────
     logger.info("=" * 60)
-    logger.info("PASSO 1/6 — Raccolta dati da Borsa Italiana")
+    logger.info("PASSO 1/7 — Raccolta dati da Borsa Italiana")
     logger.info("=" * 60)
 
     scraper = BorsaItalianaScraper()
@@ -56,20 +58,36 @@ def run_pipeline(*, dry_run: bool = False) -> None:
             sys.exit(1)
         logger.info("Recuperati %d certificati dal database", len(cached))
 
-    # ── 2. Notizie di mercato ───────────────────────────────────────
+    # ── 2. Notizie di mercato (Radiocor) ────────────────────────────
     logger.info("=" * 60)
-    logger.info("PASSO 2/6 — Raccolta notizie di mercato")
+    logger.info("PASSO 2/7 — Raccolta notizie di mercato (Radiocor)")
     logger.info("=" * 60)
 
     market_context = fetch_market_headlines()
     if market_context:
         logger.info("Notizie di mercato raccolte con successo")
     else:
-        logger.warning("Notizie non disponibili — l'intro sara' generica")
+        logger.warning("Notizie Radiocor non disponibili")
 
-    # ── 3. Screener ─────────────────────────────────────────────────
+    # ── 3. Fonti esterne (investire-certificati.it, investire.biz) ──
     logger.info("=" * 60)
-    logger.info("PASSO 3/6 — Selezione dei migliori certificati")
+    logger.info("PASSO 3/7 — Raccolta da fonti esterne")
+    logger.info("=" * 60)
+
+    try:
+        external_data = fetch_external_sources()
+        external_text = external_data.format_for_prompt()
+        if external_text:
+            logger.info("Fonti esterne raccolte con successo")
+        else:
+            logger.warning("Nessun dato dalle fonti esterne")
+    except Exception:
+        logger.warning("Errore fonti esterne", exc_info=True)
+        external_text = ""
+
+    # ── 4. Screener ─────────────────────────────────────────────────
+    logger.info("=" * 60)
+    logger.info("PASSO 4/7 — Selezione dei migliori certificati")
     logger.info("=" * 60)
 
     screener = Screener()
@@ -85,20 +103,24 @@ def run_pipeline(*, dry_run: bool = False) -> None:
     except Exception:
         logger.warning("Impossibile salvare lo storico certificati", exc_info=True)
 
-    # ── 4. Generazione contenuto ────────────────────────────────────
+    # ── 5. Generazione contenuto ────────────────────────────────────
     logger.info("=" * 60)
-    logger.info("PASSO 4/6 — Generazione newsletter con Claude")
+    logger.info("PASSO 5/7 — Generazione newsletter con Claude")
     logger.info("=" * 60)
 
     generator = NewsletterGenerator()
     try:
-        html_content = generator.create_issue(top_5, market_context=market_context)
+        html_content = generator.create_issue(
+            top_5,
+            market_context=market_context,
+            external_sources=external_text,
+        )
     except RuntimeError:
         logger.error("Impossibile generare la newsletter (Claude API non disponibile)")
         _save_fallback_html("", top_5)
         sys.exit(1)
 
-    # ── 5. Pubblicazione ────────────────────────────────────────────
+    # ── 6. Pubblicazione ────────────────────────────────────────────
     if dry_run:
         logger.info("=" * 60)
         logger.info("MODALITA' DRY-RUN — Newsletter non inviata")
@@ -107,7 +129,7 @@ def run_pipeline(*, dry_run: bool = False) -> None:
         return
 
     logger.info("=" * 60)
-    logger.info("PASSO 5/6 — Pubblicazione su Beehiiv")
+    logger.info("PASSO 6/7 — Pubblicazione su Beehiiv")
     logger.info("=" * 60)
 
     try:
@@ -121,9 +143,9 @@ def run_pipeline(*, dry_run: bool = False) -> None:
         post_id = ""
         post_url = ""
 
-    # ── 6. Registrazione nel database ───────────────────────────────
+    # ── 7. Registrazione nel database ───────────────────────────────
     logger.info("=" * 60)
-    logger.info("PASSO 6/6 — Registrazione nel database")
+    logger.info("PASSO 7/7 — Registrazione nel database")
     logger.info("=" * 60)
 
     try:

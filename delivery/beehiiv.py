@@ -1,6 +1,6 @@
 """Client Beehiiv API v2 per la pubblicazione della newsletter.
 
-Crea un post in bozza, lo programma per martedi' 9:00 CET e logga il risultato.
+Crea un post in bozza, lo programma per il prossimo invio (lun/gio 9:00 CET).
 """
 
 from __future__ import annotations
@@ -36,20 +36,23 @@ class BeehiivClient:
         subject: str | None = None,
         preview_text: str | None = None,
     ) -> dict[str, Any]:
-        """Crea un post su Beehiiv programmato per martedi' 9:00 CET.
+        """Crea un post su Beehiiv programmato per il prossimo invio.
+
+        La newsletter esce il lunedi' e il giovedi' alle 9:00 CET.
 
         Args:
             html_content: Corpo HTML della newsletter.
-            subject: Oggetto dell'email (opzionale, usa il titolo se assente).
+            subject: Oggetto dell'email (opzionale).
             preview_text: Testo di anteprima nell'inbox.
 
         Returns:
             Dizionario con 'post_id' e 'url' del post creato.
         """
         settings = get_settings()
-        title = subject or f"{settings.newsletter_name} — Edizione settimanale"
 
-        scheduled_at = self._next_tuesday_9am_cet()
+        scheduled_at = self._next_send_time()
+        day_name = "Lunedi'" if scheduled_at.weekday() == 0 else "Giovedi'"
+        title = subject or f"{settings.newsletter_name} — {day_name}"
 
         url = f"{BEEHIIV_API_BASE}/publications/{self.publication_id}/posts"
 
@@ -91,12 +94,27 @@ class BeehiivClient:
         return {"post_id": post_id, "url": post_url}
 
     @staticmethod
-    def _next_tuesday_9am_cet() -> datetime:
-        """Calcola il prossimo martedi' alle 9:00 CET."""
+    def _next_send_time() -> datetime:
+        """Calcola il prossimo slot di invio: lunedi' o giovedi' alle 9:00 CET."""
         now = datetime.now(CET)
-        days_until_tuesday = (1 - now.weekday()) % 7  # 1 = martedi'
-        if days_until_tuesday == 0 and now.hour >= 9:
-            days_until_tuesday = 7  # Gia' passato, prossima settimana
+        weekday = now.weekday()  # 0=lun, 1=mar, ..., 6=dom
+
+        # Giorni di invio: lunedi' (0) e giovedi' (3)
+        send_days = [0, 3]
+
+        # Trova il prossimo giorno di invio
+        for offset in range(1, 8):
+            candidate = (weekday + offset) % 7
+            if candidate in send_days:
+                target = now.replace(hour=9, minute=0, second=0, microsecond=0)
+                target += timedelta(days=offset)
+                return target
+
+        # Fallback: oggi stesso alle 9:00 se e' un giorno di invio e non sono le 9
+        if weekday in send_days and now.hour < 9:
+            return now.replace(hour=9, minute=0, second=0, microsecond=0)
+
+        # Non dovrebbe mai arrivare qui
         target = now.replace(hour=9, minute=0, second=0, microsecond=0)
-        target += timedelta(days=days_until_tuesday)
+        target += timedelta(days=1)
         return target
