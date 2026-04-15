@@ -1,0 +1,58 @@
+name: Newsletter Settimanale
+
+on:
+  schedule:
+    # Ogni martedi' alle 07:00 UTC (= 08:00 CET / 09:00 CEST)
+    - cron: "0 7 * * 2"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Genera senza inviare (dry run)"
+        required: false
+        default: "false"
+        type: boolean
+
+jobs:
+  genera-e-invia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Installa dipendenze
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Installa browser Playwright
+        run: playwright install chromium --with-deps
+
+      - name: Esegui pipeline newsletter
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
+          BEEHIIV_PUBLICATION_ID: ${{ secrets.BEEHIIV_PUBLICATION_ID }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python main.py --dry-run
+          else
+            python main.py
+          fi
+
+      - name: Salva anteprima (solo dry run)
+        if: inputs.dry_run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: anteprima-newsletter
+          path: newsletter_*.html
+          retention-days: 7
