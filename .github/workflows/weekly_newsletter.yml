@@ -50,7 +50,7 @@ jobs:
           fi
 
       - name: Salva anteprima (solo dry run)
-        if: inputs.dry_run == 'true'
+        if: inputs.dry_run == true
         uses: actions/upload-artifact@v4
         with:
           name: anteprima-newsletter
