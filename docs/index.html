@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mondo Certificati — Newsletter gratuita sui certificati di investimento</title>
+    <meta name="description" content="Ricevi gratis la newsletter bisettimanale sui certificati di investimento. Analisi, nuove emissioni e formazione per investitori italiani.">
+    <meta property="og:title" content="Mondo Certificati">
+    <meta property="og:description" content="La newsletter gratuita sui certificati di investimento per investitori italiani.">
+    <meta property="og:type" content="website">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        /* Logo */
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: #1a365d;
+            border-radius: 14px;
+            margin-bottom: 24px;
+        }
+
+        .logo svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: linear-gradient(160deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 80%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(26,54,93,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero-content {
+            max-width: 560px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a365d;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 32px;
+            font-weight: 400;
+        }
+
+        .description {
+            font-size: 1.05rem;
+            color: #475569;
+            margin-bottom: 40px;
+            line-height: 1.7;
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .feature {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .feature-icon {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+
+        .feature-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 4px;
+        }
+
+        .feature-text {
+            font-size: 0.82rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* CTA */
+        .cta-section {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        }
+
+        .cta-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 16px;
+        }
+
+        .cta-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .cta-input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .cta-input:focus {
+            border-color: #2563eb;
+        }
+
+        .cta-button {
+            padding: 14px 28px;
+            background: #1a365d;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .cta-button:hover {
+            background: #2563eb;
+        }
+
+        .cta-note {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        /* Schedule badge */
+        .schedule {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+            font-size: 0.82rem;
+        }
+
+        .footer a {
+            color: #64748b;
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .features { grid-template-columns: 1fr; }
+            .cta-form { flex-direction: column; }
+            .cta-button { width: 100%; }
+            .hero { padding: 24px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<section class="hero">
+    <div class="hero-content">
+
+        <!-- Logo MC -->
+        <div class="logo">
+            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <text x="2" y="28" font-family="'Segoe UI', Arial, sans-serif" font-weight="800" font-size="28" fill="white" letter-spacing="-2">MC</text>
+            </svg>
+        </div>
+
+        <h1>Mondo Certificati</h1>
+        <p class="subtitle">La newsletter gratuita sui certificati di investimento</p>
+
+        <span class="schedule">Ogni lunedi e giovedi nella tua inbox</span>
+
+        <p class="description">
+            Analisi dei migliori certificati sul mercato italiano, nuove emissioni,
+            formazione e contesto di mercato. Scritto in modo semplice per
+            investitori che vogliono capire, non solo comprare.
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">&#x1F4CA;</div>
+                <div class="feature-title">Top 5 certificati</div>
+                <div class="feature-text">Ogni edizione seleziona i certificati piu interessanti con punteggio da 0 a 100</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">&#x1F4D6;</div>
+                <div class="feature-title">Spazio didattico</div>
+                <div class="feature-text">Un concetto spiegato in modo chiaro: barriere, cedole, autocall, fiscalita</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">&#x1F195;</div>
+                <div class="feature-title">Nuove emissioni</div>
+                <div class="feature-text">Le ultime novita dal mercato con dati reali da fonti specializzate italiane</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">&#x26A0;&#xFE0F;</div>
+                <div class="feature-title">Mai promozionale</div>
+                <div class="feature-text">Solo educazione e informazione. Nessun consiglio di investimento, mai.</div>
+            </div>
+        </div>
+
+        <!-- CTA — Collega qui il form Beehiiv -->
+        <div class="cta-section">
+            <div class="cta-title">Iscriviti gratis</div>
+            <form class="cta-form" action="https://app.beehiiv.com/subscribe" method="POST">
+                <input type="hidden" name="publication_id" value="pub_7f6ed534-0dfd-4a97-af94-62212d165d90">
+                <input type="email" name="email" class="cta-input" placeholder="La tua email" required>
+                <button type="submit" class="cta-button">Iscriviti</button>
+            </form>
+            <p class="cta-note">Gratuita, cancellabile in qualsiasi momento. Niente spam.</p>
+        </div>
+
+    </div>
+</section>
+
+<footer class="footer">
+    <p>&copy; 2026 Mondo Certificati — <a href="mailto:info@mondocertificati.it">Contatti</a></p>
+    <p style="margin-top:8px;">I certificati sono strumenti finanziari complessi. Questa newsletter ha scopo informativo e non costituisce consulenza finanziaria.</p>
+</footer>
+
+</body>
+</html>
