@@ -102,17 +102,17 @@ class BeehiivClient:
         # Giorni di invio: lunedi' (0) e giovedi' (3)
         send_days = [0, 3]
 
-        # Trova il prossimo giorno di invio
+        # Se oggi e' un giorno di invio e non sono ancora le 9:00, programma per oggi
+        if weekday in send_days and now.hour < 9:
+            return now.replace(hour=9, minute=0, second=0, microsecond=0)
+
+        # Altrimenti trova il prossimo giorno di invio
         for offset in range(1, 8):
             candidate = (weekday + offset) % 7
             if candidate in send_days:
                 target = now.replace(hour=9, minute=0, second=0, microsecond=0)
                 target += timedelta(days=offset)
                 return target
-
-        # Fallback: oggi stesso alle 9:00 se e' un giorno di invio e non sono le 9
-        if weekday in send_days and now.hour < 9:
-            return now.replace(hour=9, minute=0, second=0, microsecond=0)
 
         # Non dovrebbe mai arrivare qui
         target = now.replace(hour=9, minute=0, second=0, microsecond=0)
